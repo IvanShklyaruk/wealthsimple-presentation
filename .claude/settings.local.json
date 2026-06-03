@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(open /Users/ivanshklyaruk/Desktop/Productivity/Code/Interview/Wealthsimple-Presentation/.frontend-slides/slide-previews/style-a.html)",
-      "Bash(open /Users/ivanshklyaruk/Desktop/Productivity/Code/Interview/Wealthsimple-Presentation/.frontend-slides/slide-previews/style-b.html)",
-      "Bash(open /Users/ivanshklyaruk/Desktop/Productivity/Code/Interview/Wealthsimple-Presentation/.frontend-slides/slide-previews/style-c.html)"
-    ]
-  }
-}
