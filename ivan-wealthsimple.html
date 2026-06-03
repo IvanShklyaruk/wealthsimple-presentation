@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who is Ivan? — Wealthsimple</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   THEME VARIABLES
+   ============================================================ */
+:root {
+    --bg:     #F5F5F0;
+    --dark:   #1C1C1A;
+    --mid:    #6B6B65;
+    --faint:  #ABABAB;
+    --rule:   rgba(28,28,26,0.1);
+    --accent: #3D5A4A;
+
+    --font-s: 'DM Sans', sans-serif;
+    --font-m: 'DM Mono', monospace;
+    --ease:   cubic-bezier(0.16, 1, 0.3, 1);
+    --stage-bg: #1C1C1A;
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ============================================================
+   VIEWPORT BASE — fixed 16:9 stage
+   ============================================================ */
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--stage-bg); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg); }
+.deck-stage {
+    position: absolute; left: 0; top: 0;
+    width: 1920px; height: 1080px;
+    overflow: hidden; transform-origin: 0 0;
+}
+.slide {
+    position: absolute; inset: 0;
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    visibility: hidden; opacity: 0; pointer-events: none;
+    background: var(--bg);
+    transition: opacity 0.4s ease;
+}
+.slide.active, .slide.visible {
+    visibility: visible; opacity: 1; pointer-events: auto; z-index: 1;
+}
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+.deck-controls {
+    position: fixed; left: 50%; bottom: 20px;
+    transform: translateX(-50%);
+    z-index: 1000; display: flex; gap: 8px; align-items: center;
+}
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; }
+    .slide { position: relative; display: block !important; visibility: visible !important;
+             opacity: 1 !important; pointer-events: auto !important;
+             width: 1920px; height: 1080px; break-after: page; }
+    .slide:last-child { break-after: auto; }
+    .deck-controls, .edit-hotzone, .edit-toggle, .edit-banner { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+
+/* ============================================================
+   REVEAL ANIMATIONS
+   ============================================================ */
+.reveal {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.65s var(--ease), transform 0.65s var(--ease);
+}
+.visible .reveal { opacity: 1; transform: translateY(0); }
+
+.reveal-up {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
+}
+.visible .reveal-up { opacity: 1; transform: translateY(0); }
+
+.reveal-l {
+    opacity: 0; transform: translateX(-20px);
+    transition: opacity 0.65s var(--ease), transform 0.65s var(--ease);
+}
+.visible .reveal-l { opacity: 1; transform: translateX(0); }
+
+.reveal-r {
+    opacity: 0; transform: translateX(20px);
+    transition: opacity 0.65s var(--ease), transform 0.65s var(--ease);
+}
+.visible .reveal-r { opacity: 1; transform: translateX(0); }
+
+.reveal-line {
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform 0.85s var(--ease);
+}
+.visible .reveal-line { transform: scaleX(1); }
+
+.d1 { transition-delay: 0.10s; }
+.d2 { transition-delay: 0.22s; }
+.d3 { transition-delay: 0.36s; }
+.d4 { transition-delay: 0.50s; }
+.d5 { transition-delay: 0.65s; }
+.d6 { transition-delay: 0.80s; }
+.d7 { transition-delay: 0.96s; }
+.d8 { transition-delay: 1.12s; }
+
+/* ============================================================
+   SHARED ATOMS
+   ============================================================ */
+.top-rule {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 4px; background: var(--accent);
+}
+.s-num {
+    position: absolute; bottom: 48px; right: 80px;
+    font-family: var(--font-m); font-size: 15px; font-weight: 300;
+    letter-spacing: 0.12em; color: var(--faint);
+}
+
+/* ============================================================
+   SLIDE 1 — WHO IS IVAN
+   Two-column: large text left, photo placeholder right
+   ============================================================ */
+.s1 { background: var(--bg); }
+.s1 .text-col {
+    position: absolute; top: 0; left: 0; bottom: 0; width: 1120px;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 160px;
+}
+.s1 .meta {
+    font-family: var(--font-m); font-size: 14px; font-weight: 300;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 52px;
+}
+.s1 .pre-title {
+    font-family: var(--font-s); font-size: 80px; font-weight: 300;
+    font-style: italic; color: var(--faint); line-height: 1; margin-bottom: 4px;
+}
+.s1 .main-title {
+    font-family: var(--font-s); font-size: 144px; font-weight: 700;
+    color: var(--dark); line-height: 0.95; letter-spacing: -0.03em;
+}
+.s1 .divider {
+    width: 56px; height: 1.5px; background: rgba(28,28,26,0.18); margin: 52px 0 32px;
+}
+.s1 .tagline {
+    font-family: var(--font-s); font-size: 30px; font-weight: 300;
+    font-style: italic; color: var(--mid); line-height: 1.5;
+    max-width: 740px; margin-bottom: 24px;
+}
+.s1 .creds {
+    font-family: var(--font-m); font-size: 15px; font-weight: 300;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint);
+}
+.s1 .photo-col {
+    position: absolute; top: 50%; right: 160px;
+    transform: translateY(-50%);
+    width: 380px; height: 500px;
+    border: 1px solid rgba(28,28,26,0.12);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 20px;
+}
+.s1 .photo-icon { opacity: 0.2; }
+.s1 .photo-lbl {
+    font-family: var(--font-m); font-size: 12px; font-weight: 300;
+    letter-spacing: 0.24em; text-transform: uppercase; color: var(--faint);
+}
+
+/* ============================================================
+   SLIDE 2 — TWO SIDES
+   Split: left = Builder, right = Data
+   ============================================================ */
+.s2 { background: var(--bg); }
+.s2 .center-rule {
+    position: absolute; top: 72px; bottom: 100px; left: 50%;
+    width: 1px; background: rgba(28,28,26,0.1); transform: translateX(-50%);
+}
+.s2 .half {
+    position: absolute; top: 0; bottom: 0;
+    width: 960px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 88px 96px 128px;
+}
+.s2 .half.left  { left: 0; }
+.s2 .half.right { right: 0; }
+.s2 .h-label {
+    font-family: var(--font-m); font-size: 13px; font-weight: 300;
+    letter-spacing: 0.26em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 28px; align-self: flex-start;
+}
+/* Mockup placeholder boxes */
+.s2 .mock-box {
+    flex: 1; width: 100%;
+    border: 1px solid rgba(28,28,26,0.1);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 20px; padding: 32px;
+}
+.s2 .mock-inner {
+    font-family: var(--font-m); font-size: 12px; font-weight: 300;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--faint);
+    margin-top: 16px;
+}
+/* Thinklty app tiles inside left mock */
+.s2 .app-tiles {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; width: 200px;
+}
+.s2 .app-tile {
+    height: 88px; background: rgba(28,28,26,0.04);
+    border: 1px solid rgba(28,28,26,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-m); font-size: 11px;
+    letter-spacing: 0.12em; color: var(--faint);
+}
+/* Data bars inside right mock */
+.s2 .data-bars {
+    display: flex; align-items: flex-end; gap: 10px;
+    height: 120px; padding: 0 8px;
+}
+.s2 .data-bar {
+    width: 24px; background: rgba(28,28,26,0.1); border-radius: 2px 2px 0 0;
+}
+.s2 .caption {
+    position: absolute; bottom: 48px; left: 0; right: 0;
+    text-align: center;
+    font-family: var(--font-s); font-size: 26px; font-weight: 400;
+    font-style: italic; color: var(--mid);
+}
+
+/* ============================================================
+   SLIDE 3 — THE BUILDER SIDE (Thinklty)
+   Two-column: title left, bullets right — 4 items
+   ============================================================ */
+.s-2col { background: var(--bg); }
+.s-2col .inner {
+    position: absolute; inset: 0;
+    display: grid; grid-template-columns: 560px 1fr;
+    gap: 88px; align-items: center;
+    padding: 80px 160px;
+}
+.s-2col .col-title { display: flex; flex-direction: column; }
+.s-2col .eyebrow {
+    font-family: var(--font-m); font-size: 13px; font-weight: 300;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 24px;
+}
+.s-2col .slide-title {
+    font-family: var(--font-s); font-size: 72px; font-weight: 600;
+    color: var(--dark); line-height: 1.08; letter-spacing: -0.02em;
+}
+.s-2col .title-num {
+    font-family: var(--font-m); font-size: 13px; font-weight: 300;
+    letter-spacing: 0.15em; color: var(--faint); margin-top: 40px;
+}
+.s-2col .col-bullets { display: flex; flex-direction: column; }
+.s-2col .b-item {
+    display: flex; align-items: flex-start; gap: 0;
+    padding: 26px 0;
+    border-top: 1px solid rgba(28,28,26,0.08);
+}
+.s-2col .b-item:last-child { border-bottom: 1px solid rgba(28,28,26,0.08); }
+.s-2col .b-num {
+    font-family: var(--font-m); font-size: 12px; font-weight: 300;
+    letter-spacing: 0.1em; color: var(--faint);
+    flex-shrink: 0; width: 44px; padding-top: 5px;
+}
+.s-2col .b-text {
+    font-family: var(--font-s); font-size: 26px; font-weight: 300;
+    color: var(--dark); line-height: 1.55;
+}
+
+/* ============================================================
+   SLIDES 4 AND 5 — HOOK SLIDES (full-panel dramatic text)
+   ============================================================ */
+.s-hook { background: var(--bg); }
+.s-hook .body {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center;
+    padding: 0 240px;
+}
+.s-hook .h-eyebrow {
+    font-family: var(--font-m); font-size: 14px; font-weight: 300;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 48px;
+}
+.s-hook .h-q1 {
+    font-family: var(--font-s); font-size: 72px; font-weight: 400;
+    color: var(--dark); line-height: 1.15; margin-bottom: 36px;
+}
+.s-hook .h-q2 {
+    font-family: var(--font-s); font-size: 27px; font-weight: 300;
+    color: var(--mid); line-height: 1.7;
+    max-width: 880px; margin-bottom: 72px;
+}
+.s-hook .h-big {
+    font-family: var(--font-s); font-size: 152px; font-weight: 700;
+    color: var(--dark); line-height: 1; letter-spacing: -0.04em;
+}
+.s-hook .h-underline {
+    height: 3px; width: 460px; background: var(--accent); margin-top: 20px;
+}
+
+/* ============================================================
+   SLIDE 6 — STATS: "Did you know?"
+   ============================================================ */
+.s-stats { background: var(--bg); }
+.s-stats .body {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    padding: 80px 160px;
+}
+.s-stats .heading {
+    font-family: var(--font-s); font-size: 72px; font-weight: 600;
+    color: var(--dark); letter-spacing: -0.02em;
+    margin-bottom: 52px; flex-shrink: 0;
+}
+.s-stats .grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr; gap: 20px; flex: 1;
+}
+.s-stat {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 40px 52px; border: 1px solid rgba(28,28,26,0.1);
+}
+.s-stat.hi { background: var(--dark); border-color: transparent; }
+.s-stat-num {
+    font-family: var(--font-s); font-size: 88px; font-weight: 700;
+    color: var(--dark); line-height: 1; letter-spacing: -0.03em; margin-bottom: 12px;
+}
+.s-stat.hi .s-stat-num { color: var(--bg); }
+.s-stat-lbl {
+    font-family: var(--font-s); font-size: 22px; font-weight: 300;
+    color: var(--mid); line-height: 1.5;
+}
+.s-stat.hi .s-stat-lbl { color: rgba(245,245,240,0.5); }
+
+/* ============================================================
+   SLIDE 7 — PIPELINE
+   ============================================================ */
+.s-pipe { background: var(--bg); }
+.s-pipe .body {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    padding: 80px 160px 96px;
+}
+.s-pipe .heading {
+    font-family: var(--font-s); font-size: 56px; font-weight: 400;
+    font-style: italic; color: var(--dark);
+    line-height: 1.25; margin-bottom: 0; flex-shrink: 0;
+}
+.flow {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+}
+.f-node {
+    width: 248px; height: 168px;
+    border: 1px solid rgba(28,28,26,0.18);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 18px; flex-shrink: 0;
+}
+.f-node.hi { background: var(--dark); border-color: transparent; }
+.f-tag {
+    font-family: var(--font-m); font-size: 11px; font-weight: 300;
+    letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--faint); margin-bottom: 10px;
+}
+.f-node.hi .f-tag { color: rgba(245,245,240,0.35); }
+.f-lbl {
+    font-family: var(--font-s); font-size: 21px; font-weight: 500;
+    color: var(--dark); line-height: 1.3;
+}
+.f-node.hi .f-lbl { color: var(--bg); }
+.f-arrow { display: flex; align-items: center; width: 84px; flex-shrink: 0; }
+.f-arrow-line { flex: 1; height: 1px; background: rgba(28,28,26,0.2); }
+.f-arrow-head {
+    width: 0; height: 0;
+    border-top: 5px solid transparent; border-bottom: 5px solid transparent;
+    border-left: 9px solid rgba(28,28,26,0.2);
+}
+
+/* ============================================================
+   SLIDE 10 — PUBLIC IMPACT
+   ============================================================ */
+.s-impact { background: var(--bg); }
+.s-impact .body {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; padding: 80px 160px;
+}
+.s-impact .heading {
+    font-family: var(--font-s); font-size: 72px; font-weight: 600;
+    color: var(--dark); letter-spacing: -0.02em;
+    margin-bottom: 60px; flex-shrink: 0;
+}
+.i-list { display: flex; flex-direction: column; flex: 1; justify-content: center; }
+.i-row {
+    display: flex; align-items: flex-start; gap: 40px;
+    padding: 32px 0; border-top: 1px solid rgba(28,28,26,0.08);
+}
+.i-row:last-child { border-bottom: 1px solid rgba(28,28,26,0.08); }
+.i-num {
+    font-family: var(--font-m); font-size: 13px; font-weight: 300;
+    letter-spacing: 0.12em; color: var(--accent);
+    flex-shrink: 0; width: 32px; padding-top: 7px;
+}
+.i-text {
+    font-family: var(--font-s); font-size: 27px; font-weight: 300;
+    color: var(--dark); line-height: 1.6;
+}
+.i-text strong { font-weight: 600; }
+
+/* ============================================================
+   SLIDE 11 — CLOSING
+   ============================================================ */
+.s-close { background: var(--bg); }
+.s-close .inner {
+    position: absolute; inset: 0;
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center; padding: 80px 160px; gap: 120px;
+}
+.s-close .col-q {
+    display: flex; flex-direction: column;
+    border-left: 2px solid rgba(28,28,26,0.1);
+    padding-left: 56px;
+}
+.s-close .q-ey {
+    font-family: var(--font-m); font-size: 13px; font-weight: 300;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 32px;
+}
+.s-close .q-txt {
+    font-family: var(--font-s); font-size: 40px; font-weight: 300;
+    font-style: italic; color: var(--mid); line-height: 1.45;
+}
+.s-close .q-attr {
+    font-family: var(--font-m); font-size: 14px; font-weight: 300;
+    letter-spacing: 0.14em; color: var(--faint); margin-top: 40px;
+}
+.s-close .col-c { display: flex; flex-direction: column; }
+.s-close .c-ey {
+    font-family: var(--font-m); font-size: 13px; font-weight: 300;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--faint); margin-bottom: 44px;
+}
+.s-close .c-txt {
+    font-family: var(--font-s); font-size: 62px; font-weight: 600;
+    color: var(--dark); line-height: 1.2; letter-spacing: -0.02em;
+}
+.s-close .c-name {
+    font-family: var(--font-m); font-size: 15px; font-weight: 300;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--mid); margin-top: 48px;
+}
+
+/* ============================================================
+   DECK CONTROLS
+   ============================================================ */
+.deck-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(245,245,240,0.25);
+    border: none; cursor: pointer; padding: 0;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+.deck-dot.on { background: rgba(245,245,240,0.8); transform: scale(1.5); }
+
+/* ============================================================
+   INLINE EDITING
+   ============================================================ */
+.edit-hotzone {
+    position: fixed; top: 0; left: 0; width: 80px; height: 80px;
+    z-index: 10000; cursor: pointer;
+}
+.edit-toggle {
+    position: fixed; top: 16px; left: 16px;
+    width: 40px; height: 40px; border: none; border-radius: 8px;
+    background: rgba(28,28,26,0.12); backdrop-filter: blur(8px);
+    font-size: 18px; cursor: pointer; z-index: 10001;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+}
+.edit-toggle.show, .edit-toggle.on { opacity: 1; pointer-events: auto; }
+.edit-banner {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    background: rgba(28,28,26,0.88); color: rgba(245,245,240,0.9);
+    font-family: var(--font-m); font-size: 13px; letter-spacing: 0.06em;
+    padding: 8px 20px; border-radius: 100px;
+    z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+}
+.edit-banner.show { opacity: 1; }
+
+</style>
+</head>
+<body>
+
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ============================================================
+     SLIDE 1 — WHO IS IVAN
+     ============================================================ -->
+<section class="slide s1 active" aria-label="Who is Ivan">
+  <div class="top-rule"></div>
+  <div class="text-col">
+    <div class="meta reveal d1">Wealthsimple · June 2026</div>
+    <div class="pre-title reveal d2">But first...</div>
+    <div class="main-title reveal d3">who is Ivan?</div>
+    <div class="divider reveal d4"></div>
+    <div class="tagline reveal d4">"I like to say I'm half builder,<br>half data-driven."</div>
+    <div class="creds reveal d5">Ivan Shklyaruk &nbsp;·&nbsp; UWaterloo Graduate</div>
+  </div>
+  <div class="photo-col reveal d4">
+    <svg class="photo-icon" width="56" height="56" viewBox="0 0 56 56" fill="none">
+      <circle cx="28" cy="20" r="10" stroke="#1C1C1A" stroke-width="1.2"/>
+      <path d="M4 52c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke="#1C1C1A" stroke-width="1.2"/>
+    </svg>
+    <div class="photo-lbl">Photo</div>
+  </div>
+  <div class="s-num">01 / 11</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 2 — TWO SIDES: Builder | Data
+     ============================================================ -->
+<section class="slide s2" aria-label="Two sides">
+  <div class="top-rule"></div>
+  <div class="center-rule"></div>
+
+  <!-- Left: Builder -->
+  <div class="half left">
+    <div class="h-label reveal-l d1">Builder</div>
+    <div class="mock-box reveal-l d2">
+      <!-- 4 Thinklty puzzle tiles -->
+      <div class="app-tiles">
+        <div class="app-tile reveal d3">Word</div>
+        <div class="app-tile reveal d4">Grid</div>
+        <div class="app-tile reveal d4">Word</div>
+        <div class="app-tile reveal d5">Grid</div>
+      </div>
+      <div class="mock-inner">Thinklty App</div>
+    </div>
+  </div>
+
+  <!-- Right: Data -->
+  <div class="half right">
+    <div class="h-label reveal-r d1">Data</div>
+    <div class="mock-box reveal-r d2">
+      <!-- Simplified data bars -->
+      <div class="data-bars">
+        <div class="data-bar reveal d3" style="height:45%"></div>
+        <div class="data-bar reveal d3" style="height:62%"></div>
+        <div class="data-bar reveal d4" style="height:38%"></div>
+        <div class="data-bar reveal d4" style="height:78%"></div>
+        <div class="data-bar reveal d5" style="height:55%"></div>
+        <div class="data-bar reveal d5" style="height:88%"></div>
+        <div class="data-bar reveal d6" style="height:70%"></div>
+        <div class="data-bar reveal d6" style="height:50%"></div>
+      </div>
+      <div class="mock-inner">Air Quality Index Data</div>
+    </div>
+  </div>
+
+  <div class="caption reveal d6">That's why these two projects define me.</div>
+  <div class="s-num">02 / 11</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 3 — THE BUILDER SIDE: Thinklty
+     ============================================================ -->
+<section class="slide s-2col" aria-label="Thinklty">
+  <div class="top-rule"></div>
+  <div class="inner">
+    <div class="col-title">
+      <div class="eyebrow reveal d1">The Builder Side</div>
+      <div class="slide-title reveal d2">Thinklty.</div>
+      <div class="title-num reveal d5">03 / 11</div>
+    </div>
+    <div class="col-bullets">
+      <div class="b-item reveal d2">
+        <div class="b-num">01</div>
+        <div class="b-text">Me and my friend are building Thinklty — a daily puzzle app</div>
+      </div>
+      <div class="b-item reveal d3">
+        <div class="b-num">02</div>
+        <div class="b-text">4 puzzles a day — two word-based, two grid-based</div>
+      </div>
+      <div class="b-item reveal d4">
+        <div class="b-num">03</div>
+        <div class="b-text">Premium feel, smooth animations, polished user experience</div>
+      </div>
+      <div class="b-item reveal d5">
+        <div class="b-num">04</div>
+        <div class="b-text">React Native — iOS, Android, and web</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 4 — HOOK INTO DATA STORY
+     ============================================================ -->
+<section class="slide s-hook" aria-label="Transition to data">
+  <div class="top-rule"></div>
+  <div class="body">
+    <div class="h-eyebrow reveal d1">The Other Half</div>
+    <div class="h-q1 reveal d2">But I'm not just a builder.</div>
+    <div class="h-q2 reveal d4">Let me tell you about the other half.</div>
+  </div>
+  <div class="s-num">04 / 11</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 5 — DO YOU CARE ABOUT YOUR HEALTH?
+     ============================================================ -->
+<section class="slide s-hook" aria-label="Air quality hook">
+  <div class="top-rule"></div>
+  <div class="body">
+    <div class="h-q1 reveal d1">Do you care about your health?</div>
+    <div class="h-q2 reveal d3">Who doesn't. But have you ever thought about something<br>you breathe every second and never worry about?</div>
+    <div class="h-big reveal-up d5">Air quality.</div>
+    <div class="h-underline reveal-line d7"></div>
+  </div>
+  <div class="s-num">05 / 11</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 6 — DID YOU KNOW? (Stats)
+     ============================================================ -->
+<section class="slide s-stats" aria-label="Statistics">
+  <div class="top-rule"></div>
+  <div class="body">
+    <div class="heading reveal d1">Did you know?</div>
+    <div class="grid">
+      <div class="s-stat hi reveal d2">
+        <div class="s-stat-num">38</div>
+        <div class="s-stat-lbl">monitoring stations across Ontario</div>
+      </div>
+      <div class="s-stat reveal d3">
+        <div class="s-stat-num">24/7</div>
+        <div class="s-stat-lbl">data posted every hour, 365 days a year</div>
+      </div>
+      <div class="s-stat reveal d4">
+        <div class="s-stat-num" style="font-size:68px;letter-spacing:-0.04em">332,640</div>
+        <div class="s-stat-lbl">hourly readings generated every year</div>
+      </div>
+      <div class="s-stat hi reveal d5">
+        <div class="s-stat-num" style="font-size:52px;letter-spacing:-0.02em;line-height:1.1">Tens of<br>thousands</div>
+        <div class="s-stat-lbl">Canadians with asthma depend on this data</div>
+      </div>
+    </div>
+  </div>
+  <div class="s-num">06 / 11</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 7 — THE PIPELINE
+     ============================================================ -->
+<section class="slide s-pipe" aria-label="Data pipeline">
+  <div class="top-rule"></div>
+  <div class="body">
+    <div class="heading reveal d1">But what is data without<br>someone to use it?</div>
+    <div class="flow">
+      <div class="f-node reveal d2"><div class="f-tag">Source</div><div class="f-lbl">Monitoring<br>Station</div></div>
+      <div class="f-arrow reveal d3"><div class="f-arrow-line"></div><div class="f-arrow-head"></div></div>
+      <div class="f-node hi reveal d3"><div class="f-tag">Process</div><div class="f-lbl">Data<br>Pipeline</div></div>
+      <div class="f-arrow reveal d4"><div class="f-arrow-line"></div><div class="f-arrow-head"></div></div>
+      <div class="f-node reveal d4"><div class="f-tag">Store</div><div class="f-lbl">Database</div></div>
+      <div class="f-arrow reveal d5"><div class="f-arrow-line"></div><div class="f-arrow-head"></div></div>
+      <div class="f-node reveal d5"><div class="f-tag">Consume</div><div class="f-lbl">Research<br>Scientists</div></div>
+      <div class="f-arrow reveal d6"><div class="f-arrow-line"></div><div class="f-arrow-head"></div></div>
+      <div class="f-node reveal d6"><div class="f-tag">Impact</div><div class="f-lbl">Public</div></div>
+    </div>
+  </div>
+  <div class="s-num">07 / 11</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 8 — THAT'S WHERE I CAME IN
+     ============================================================ -->
+<section class="slide s-2col" aria-label="My role">
+  <div class="top-rule"></div>
+  <div class="inner">
+    <div class="col-title">
+      <div class="eyebrow reveal d1">Contribution</div>
+      <div class="slide-title reveal d2">That's where<br>I came in.</div>
+      <div class="title-num reveal d5">08 / 11</div>
+    </div>
+    <div class="col-bullets">
+      <div class="b-item reveal d2">
+        <div class="b-num">01</div>
+        <div class="b-text">Restructured SQL queries in DBeaver to reorganize how data was stored</div>
+      </div>
+      <div class="b-item reveal d3">
+        <div class="b-num">02</div>
+        <div class="b-text">Improved data collection and organization in the Python pipeline</div>
+      </div>
+      <div class="b-item reveal d4">
+        <div class="b-num">03</div>
+        <div class="b-text">Built a forecasting layer using pandas and scikit-learn to predict the AQHI</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 9 — STAKEHOLDER COLLABORATION
+     ============================================================ -->
+<section class="slide s-2col" aria-label="Stakeholder collaboration">
+  <div class="top-rule"></div>
+  <div class="inner">
+    <div class="col-title">
+      <div class="eyebrow reveal d1">Research Partnership</div>
+      <div class="slide-title reveal d2">Understanding<br>researchers.</div>
+      <div class="title-num reveal d5">09 / 11</div>
+    </div>
+    <div class="col-bullets">
+      <div class="b-item reveal d2">
+        <div class="b-num">01</div>
+        <div class="b-text">Researchers require different data formats depending on their project</div>
+      </div>
+      <div class="b-item reveal d3">
+        <div class="b-num">02</div>
+        <div class="b-text">Worked closely with senior data scientists to understand their requirements</div>
+      </div>
+      <div class="b-item reveal d4">
+        <div class="b-num">03</div>
+        <div class="b-text">Translated research requirements into database restructuring decisions</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 10 — PUBLIC IMPACT
+     ============================================================ -->
+<section class="slide s-impact" aria-label="Public impact">
+  <div class="top-rule"></div>
+  <div class="body">
+    <div class="heading reveal d1">This data doesn't stay inside.</div>
+    <div class="i-list">
+      <div class="i-row reveal d2">
+        <div class="i-num">01</div>
+        <div class="i-text">Open data at <strong>open.canada.ca</strong> enables research from institutions across the country</div>
+      </div>
+      <div class="i-row reveal d4">
+        <div class="i-num">02</div>
+        <div class="i-text">In 2023, Ontario reported <strong>low-risk air quality 92% of the time</strong> — data your pipeline helped produce</div>
+      </div>
+      <div class="i-row reveal d6">
+        <div class="i-num">03</div>
+        <div class="i-text">During the <strong>2024 Canadian wildfires</strong>, this system was used to protect public health in real time</div>
+      </div>
+    </div>
+  </div>
+  <div class="s-num">10 / 11</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 11 — CLOSING
+     ============================================================ -->
+<section class="slide s-close" aria-label="Closing">
+  <div class="top-rule"></div>
+  <div class="inner">
+    <div class="col-q">
+      <div class="q-ey reveal d1">What I learned</div>
+      <div class="q-txt reveal d2">"Data is only as valuable as the people who can use it."</div>
+      <div class="q-attr reveal d4">Ivan Shklyaruk · 2026</div>
+    </div>
+    <div class="col-c">
+      <div class="c-ey reveal d3">A promise</div>
+      <div class="c-txt reveal d4">That's the kind of impact I want to bring to Wealthsimple.</div>
+      <div class="c-name reveal d6">Ivan Shklyaruk</div>
+    </div>
+  </div>
+  <div class="s-num">11 / 11</div>
+</section>
+
+</main>
+</div>
+
+<nav class="deck-controls" id="deckControls" aria-label="Slide navigation"></nav>
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">✏️</button>
+<div class="edit-banner" id="editBanner">Click any text to edit &nbsp;·&nbsp; Ctrl+S to save</div>
+
+<script>
+/* ============================================================
+   INLINE EDITOR
+   ============================================================ */
+class InlineEditor {
+    constructor() {
+        this.isOn   = false;
+        this.btn    = document.getElementById('editToggle');
+        this.zone   = document.getElementById('editHotzone');
+        this.banner = document.getElementById('editBanner');
+        this._hide  = null;
+
+        this.zone.addEventListener('mouseenter', () => { clearTimeout(this._hide); this.btn.classList.add('show'); });
+        this.zone.addEventListener('mouseleave', () => { this._hide = setTimeout(() => { if (!this.isOn) this.btn.classList.remove('show'); }, 400); });
+        this.btn.addEventListener('mouseenter',  () => clearTimeout(this._hide));
+        this.btn.addEventListener('mouseleave',  () => { this._hide = setTimeout(() => { if (!this.isOn) this.btn.classList.remove('show'); }, 400); });
+        this.btn.addEventListener('click',  () => this.toggle());
+        this.zone.addEventListener('click', () => this.toggle());
+        document.addEventListener('keydown', e => {
+            if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) this.toggle();
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); this.save(); }
+        });
+    }
+    get targets() {
+        return '.pre-title, .main-title, .tagline, .creds, .slide-title, .b-text, .h-q1, .h-q2, .h-big, .heading, .s-stat-num, .s-stat-lbl, .f-lbl, .i-text, .q-txt, .c-txt';
+    }
+    toggle() {
+        this.isOn = !this.isOn;
+        this.btn.classList.toggle('on', this.isOn);
+        this.banner.classList.toggle('show', this.isOn);
+        document.querySelectorAll(this.targets).forEach(el => {
+            el.contentEditable = this.isOn ? 'true' : 'false';
+            el.style.outline = this.isOn ? '1px dashed rgba(61,90,74,0.4)' : '';
+            el.style.borderRadius = this.isOn ? '3px' : '';
+        });
+    }
+    save() {
+        try {
+            const d = {};
+            document.querySelectorAll(this.targets).forEach((el, i) => { d[i] = el.innerHTML; });
+            localStorage.setItem('ivan-deck', JSON.stringify(d));
+        } catch(_) {}
+        const p = this.banner.textContent;
+        this.banner.textContent = '✓ Saved';
+        setTimeout(() => { this.banner.textContent = p; }, 2000);
+    }
+}
+
+/* ============================================================
+   SLIDE CONTROLLER
+   ============================================================ */
+class SlidePresentation {
+    constructor(editor) {
+        this.editor = editor;
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.total  = this.slides.length;
+        this.cur    = 0;
+        this.stage  = document.getElementById('deckStage');
+        this.dotsEl = document.getElementById('deckControls');
+
+        this._buildDots();
+        this._scale();
+        this._bindKeys();
+        this._bindTouch();
+        this._bindWheel();
+        this._show(0);
+        window.addEventListener('resize', () => this._scale());
+    }
+    _scale() {
+        const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        const x = (window.innerWidth  - 1920 * s) / 2;
+        const y = (window.innerHeight - 1080 * s) / 2;
+        this.stage.style.transform = `translate(${x}px,${y}px) scale(${s})`;
+    }
+    _show(i) {
+        this.cur = Math.max(0, Math.min(i, this.total - 1));
+        this.slides.forEach((sl, idx) => {
+            const on = idx === this.cur;
+            sl.classList.toggle('active',  on);
+            sl.classList.toggle('visible', on);
+        });
+        this._updateDots();
+    }
+    next() { this._show(this.cur + 1); }
+    prev() { this._show(this.cur - 1); }
+    _bindKeys() {
+        document.addEventListener('keydown', e => {
+            if (this.editor.isOn && e.target.getAttribute('contenteditable')) return;
+            switch (e.key) {
+                case 'ArrowRight': case 'ArrowDown': case ' ':    case 'PageDown': e.preventDefault(); this.next(); break;
+                case 'ArrowLeft':  case 'ArrowUp':   case 'PageUp':               e.preventDefault(); this.prev(); break;
+                case 'Home': e.preventDefault(); this._show(0);            break;
+                case 'End':  e.preventDefault(); this._show(this.total-1); break;
+            }
+        });
+    }
+    _bindTouch() {
+        let sx = 0;
+        document.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+        document.addEventListener('touchend',   e => {
+            const dx = e.changedTouches[0].clientX - sx;
+            if (Math.abs(dx) > 40) dx < 0 ? this.next() : this.prev();
+        });
+    }
+    _bindWheel() {
+        let last = 0;
+        window.addEventListener('wheel', e => {
+            const now = Date.now();
+            if (now - last < 700) return;
+            last = now;
+            e.deltaY > 0 ? this.next() : this.prev();
+        }, { passive: true });
+    }
+    _buildDots() {
+        this.slides.forEach((_, i) => {
+            const d = document.createElement('button');
+            d.className = 'deck-dot';
+            d.setAttribute('aria-label', `Slide ${i + 1}`);
+            d.addEventListener('click', () => this._show(i));
+            this.dotsEl.appendChild(d);
+        });
+    }
+    _updateDots() {
+        this.dotsEl.querySelectorAll('.deck-dot').forEach((d, i) => d.classList.toggle('on', i === this.cur));
+    }
+}
+
+const editor = new InlineEditor();
+const deck   = new SlidePresentation(editor);
+</script>
+</body>
+</html>
